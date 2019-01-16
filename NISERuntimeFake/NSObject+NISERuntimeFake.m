@@ -8,10 +8,12 @@
 @implementation NSObject (NISERuntimeFake)
 
 + (Class)fakeClass {
-    NSString *className = [NSString stringWithFormat:@"NISEFake%@", NSStringFromClass([self class])];
+    NSString *className = [NSString stringWithFormat:@"NISEFake-%@-%@", [[NSUUID UUID] UUIDString], NSStringFromClass([self class])];
     [self assertClassNotExists:NSClassFromString(className)];
-
+    
     Class class = objc_allocateClassPair(self.class, [className cStringUsingEncoding:NSUTF8StringEncoding], 0);
+    objc_registerClassPair(class);
+    
     return class;
 }
 
@@ -87,7 +89,6 @@
                                                        NSStringFromSelector(method_getName(method)),
                                                        NSStringFromClass(aClass)];
     NSAssert([NSStringFromClass(aClass) hasPrefix:@"NISEFake"], description);
-    NSAssert(!NSClassFromString(NSStringFromClass(aClass)), description);
 }
 
 - (void)assertMethodExists:(Method)method {
